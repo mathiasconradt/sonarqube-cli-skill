@@ -2,7 +2,7 @@
 name: sonar-cli
 description: Work with SonarQube CLI - analyze code, scan for secrets, manage authentication, list issues/projects, and integrate with Claude Code. Use when the user asks about SonarQube, code quality, static analysis, code smells, vulnerability scanning, security scans, sonar issues, or integrating sonar with Claude.
 metadata:
-  version: "0.5.0"
+  version: "0.7.0"
   homepage: "https://github.com/SonarSource/sonarqube-cli"
   openclaw_emoji: "🔍"
   openclaw_requires_bins: "sonar"
@@ -30,9 +30,6 @@ irm https://raw.githubusercontent.com/SonarSource/sonarqube-cli/refs/heads/maste
 # Login to SonarQube Cloud
 sonar auth login
 
-# Install secrets scanner
-sonar install secrets
-
 # Integrate with Claude Code (global setup)
 sonar integrate claude -g
 ```
@@ -54,7 +51,10 @@ sonar auth logout
 ### Secrets Scanning
 ```bash
 # Scan a file for hardcoded secrets
-sonar analyze secrets --file ./src/config.js
+sonar analyze secrets ./src/config.js
+
+# Scan multiple files
+sonar analyze secrets ./src/**/*.js
 
 # Scan from stdin
 echo "API_KEY=sk_test" | sonar analyze secrets --stdin
@@ -72,9 +72,9 @@ sonar list projects -q "my-app"
 ### Integration
 ```bash
 # Integrate with Claude Code globally
-sonar integrate claude -g -p my-project
+sonar integrate claude -g
 
-# Project-specific integration
+# Project-specific integration with project key
 sonar integrate claude -p my-project
 ```
 
@@ -89,22 +89,16 @@ sonar auth login -o my-org
 sonar auth status
 # If no connection: retry with -t flag for token, or use -s flag for custom server
 
-# 3. Install secrets scanner
-sonar install secrets
-
-# 4. Verify installation
-sonar install secrets --status
-# If not installed: run 'sonar install secrets --force'
-
-# 5. Integrate with Claude Code
-sonar integrate claude -g -p my-project
+# 3. Integrate with Claude Code
+sonar integrate claude -g
+# Note: Secrets scanner is auto-installed when first used
 ```
 
 ## Quick Troubleshooting
 
 **Authentication:** Run `sonar auth status` to check connection. Use `sonar auth purge` and re-login if needed.
 
-**Secrets scanner:** Check with `sonar install secrets --status`, reinstall with `--force` flag.
+**Secrets scanner:** Auto-installs when you run `sonar analyze secrets` for the first time.
 
 **Project not found:** List projects with `sonar list projects` or search by name with `-q "project-name"`.
 

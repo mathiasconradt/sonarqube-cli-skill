@@ -55,56 +55,57 @@ Remove all authentication tokens from keychain (interactive).
 sonar auth purge
 ```
 
-## Installation Management (`sonar install`)
-
-### Install Secrets Scanner
-Install sonar-secrets binary from binaries.sonarsource.com.
-
-```bash
-# Install secrets scanner
-sonar install secrets
-
-# Check installation status
-sonar install secrets --status
-
-# Force reinstall
-sonar install secrets --force
-```
-
-**Options:**
-- `--force` - Force reinstall even if already installed
-- `--status` - Check installation status instead of installing
-
 ## Integration (`sonar integrate`)
 
 ### Claude Code Integration
 Setup SonarQube integration for Claude Code with secrets scanning hooks and MCP server.
 
 ```bash
-# Interactive setup (will prompt for server, project, etc.)
+# Interactive setup (will prompt for project details)
 sonar integrate claude
 
 # Global installation (installs to ~/.claude for all projects)
 sonar integrate claude -g
 
-# Non-interactive with all parameters
-sonar integrate claude -s https://sonarcloud.io -p my-project -o my-org -t <token> --non-interactive
+# Non-interactive with project key
+sonar integrate claude -p my-project --non-interactive
 
 # Project-specific installation
 sonar integrate claude -p my-project
-
-# Skip hooks installation (MCP server only)
-sonar integrate claude --skip-hooks
 ```
 
 **Options:**
-- `-s, --server <server>` - SonarQube server URL
 - `-p, --project <project>` - Project key
-- `-t, --token <token>` - Existing authentication token
-- `-o, --org <org>` - Organization key (for SonarQube Cloud)
 - `--non-interactive` - Non-interactive mode (no prompts)
-- `--skip-hooks` - Skip hooks installation
 - `-g, --global` - Install to ~/.claude instead of project directory
+
+**Note:** Authentication must be set up separately using `sonar auth login` before running integration.
+
+### Git Integration
+Install git hooks that scan for secrets before commits or pushes.
+
+```bash
+# Install pre-commit hook (scans staged files)
+sonar integrate git --hook pre-commit
+
+# Install pre-push hook (scans unpushed commits)
+sonar integrate git --hook pre-push
+
+# Force overwrite existing hook
+sonar integrate git --hook pre-commit --force
+
+# Install globally for all repositories
+sonar integrate git --hook pre-commit --global
+
+# Non-interactive mode
+sonar integrate git --hook pre-commit --non-interactive
+```
+
+**Options:**
+- `--hook <type>` - Hook type: `pre-commit` (scan staged files) or `pre-push` (scan files in unpushed commits)
+- `--force` - Overwrite existing hook even if not created by sonar
+- `--non-interactive` - Non-interactive mode (no prompts)
+- `--global` - Install hook globally for all repositories (sets `git config --global core.hooksPath`)
 
 ## List Resources (`sonar list`)
 
@@ -163,25 +164,66 @@ sonar list projects --page 2 --page-size 50
 
 ## Code Analysis
 
+### Verify File
+Analyze a file for issues using SonarQube Cloud's server-side analysis.
+
+```bash
+# Analyze a file with auto-detected project
+sonar verify --file ./src/app.js
+
+# Analyze with specific branch context
+sonar verify --file ./src/app.js --branch main
+
+# Specify project key explicitly
+sonar verify --file ./src/app.js --project my-project
+```
+
+**Options:**
+- `--file <file>` - File path to analyze (required)
+- `--branch <branch>` - Branch name for analysis context
+- `--project <project>` - SonarQube Cloud project key (overrides auto-detection)
+
+### SQAA Analysis
+Run SQAA (SonarQube AI Agent) server-side analysis on a file. SonarQube Cloud only.
+
+```bash
+# Analyze a file with SQAA
+sonar analyze sqaa --file ./src/app.js
+
+# Analyze with branch context
+sonar analyze sqaa --file ./src/app.js --branch main
+
+# Specify project explicitly
+sonar analyze sqaa --file ./src/app.js --project my-project
+```
+
+**Options:**
+- `--file <file>` - File path to analyze (required)
+- `--branch <branch>` - Branch name for analysis context
+- `--project <project>` - SonarQube Cloud project key (overrides auto-detection)
+
 ### Secrets Scanning
 Scan files or stdin for hardcoded secrets.
 
 ```bash
 # Scan a specific file
-sonar analyze secrets --file ./src/config.js
+sonar analyze secrets ./src/config.js
+
+# Scan multiple files or directories
+sonar analyze secrets ./src ./tests
+sonar analyze secrets ./src/**/*.js
 
 # Scan from stdin
 echo "API_KEY=sk_test_12345" | sonar analyze secrets --stdin
-
-# Scan multiple files with shell expansion
-for file in src/**/*.js; do sonar analyze secrets --file "$file"; done
 ```
 
-**Options:**
-- `--file <file>` - File path to scan for secrets
-- `--stdin` - Read from standard input instead of a file
+**Arguments:**
+- `[paths...]` - File or directory paths to scan for secrets
 
-**Note:** Either `--file` or `--stdin` must be specified, not both.
+**Options:**
+- `--stdin` - Read from standard input instead of file paths
+
+**Note:** Provide either file paths or use `--stdin`, not both.
 
 ## Configuration (`sonar config`)
 
@@ -199,6 +241,25 @@ sonar config telemetry --disabled
 **Options:**
 - `--enabled` - Enable collection of anonymous usage statistics
 - `--disabled` - Disable collection of anonymous usage statistics
+
+## Self-Update (`sonar self-update`)
+
+Update the SonarQube CLI to the latest version.
+
+```bash
+# Update to latest version
+sonar self-update
+
+# Check for updates without installing
+sonar self-update --status
+
+# Force reinstall even if up to date
+sonar self-update --force
+```
+
+**Options:**
+- `--status` - Check for a newer version without installing
+- `--force` - Install the latest version even if already up to date
 
 ## Advanced Workflows
 
@@ -229,13 +290,7 @@ sonar auth login
 ```
 
 ### Secrets scanner not found
-```bash
-# Check installation status
-sonar install secrets --status
-
-# Reinstall
-sonar install secrets --force
-```
+The secrets scanner is automatically downloaded and installed when you first run `sonar analyze secrets`. No manual installation is required.
 
 ### Project not found
 ```bash
