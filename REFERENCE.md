@@ -18,7 +18,7 @@ sonar auth login -o my-org
 sonar auth login -s https://sonarqube.mycompany.com
 
 # Non-interactive with token
-sonar auth login -t <token> -o my-org
+sonar auth login --with-token <token> -o my-org
 ```
 
 **Options:**
@@ -39,7 +39,7 @@ sonar auth logout -s https://sonarcloud.io -o my-org
 
 **Options:**
 - `-s, --server <server>` - SonarQube server URL
-- `-o, --org <org>` - Organization key
+- `-o, --org <org>` - SonarQube Cloud organization key (required for SonarQube Cloud)
 
 ### Status
 Show active authentication connection with token verification.
@@ -48,12 +48,18 @@ Show active authentication connection with token verification.
 sonar auth status
 ```
 
+**Options:**
+- None - displays information about the current authentication status
+
 ### Purge
 Remove all authentication tokens from keychain (interactive).
 
 ```bash
 sonar auth purge
 ```
+
+**Options:**
+- None - prompts for confirmation before removing all tokens
 
 ## Integration (`sonar integrate`)
 
@@ -211,6 +217,8 @@ sonar analyze secrets ./src/config.js
 
 # Scan multiple files or directories
 sonar analyze secrets ./src ./tests
+
+# Scan with glob pattern (requires shell expansion)
 sonar analyze secrets ./src/**/*.js
 
 # Scan from stdin

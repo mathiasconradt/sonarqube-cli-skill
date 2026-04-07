@@ -53,8 +53,8 @@ sonar auth logout
 # Scan a file for hardcoded secrets
 sonar analyze secrets ./src/config.js
 
-# Scan multiple files
-sonar analyze secrets ./src/**/*.js
+# Scan multiple files or directories
+sonar analyze secrets ./src ./tests
 
 # Scan from stdin
 echo "API_KEY=sk_test" | sonar analyze secrets --stdin
@@ -87,7 +87,7 @@ sonar auth login -o my-org
 
 # 2. Verify authentication
 sonar auth status
-# If no connection: retry with -t flag for token, or use -s flag for custom server
+# If no connection: retry with --with-token flag for token, or use -s flag for custom server
 
 # 3. Integrate with Claude Code
 sonar integrate claude -g
