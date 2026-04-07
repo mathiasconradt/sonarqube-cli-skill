@@ -24,16 +24,6 @@ curl -o- https://raw.githubusercontent.com/SonarSource/sonarqube-cli/refs/heads/
 irm https://raw.githubusercontent.com/SonarSource/sonarqube-cli/refs/heads/master/user-scripts/install.ps1 | iex
 ```
 
-## Quick Setup for Claude Code
-
-```bash
-# Login to SonarQube Cloud
-sonar auth login
-
-# Integrate with Claude Code (global setup)
-sonar integrate claude -g
-```
-
 ## Common Commands
 
 ### Authentication
@@ -52,12 +42,14 @@ sonar auth logout
 ```bash
 # Scan a file for hardcoded secrets
 sonar analyze secrets ./src/config.js
+# ✅ Success: "Scan completed successfully"
+# ❌ Issues found: Exit code 1 with details
 
 # Scan multiple files or directories
 sonar analyze secrets ./src ./tests
 
-# Scan from stdin
-echo "API_KEY=sk_test" | sonar analyze secrets --stdin
+# Scan from stdin with validation
+echo "API_KEY=sk_test" | sonar analyze secrets --stdin && echo "No secrets found" || echo "Secrets detected"
 ```
 
 ### List Resources
@@ -87,11 +79,19 @@ sonar auth login -o my-org
 
 # 2. Verify authentication
 sonar auth status
-# If no connection: retry with --with-token flag for token, or use -s flag for custom server
 
-# 3. Integrate with Claude Code
+# If authentication fails, recover with:
+sonar auth purge                                           # Clear all tokens
+sonar auth login -o my-org --with-token <your-token>      # Login with token
+# Or for self-hosted:
+sonar auth login -s https://sonarqube.company.com
+
+# 3. Integrate with Claude Code (installs hooks and MCP server)
 sonar integrate claude -g
-# Note: Secrets scanner is auto-installed when first used
+
+# 4. Test secrets scanner (auto-installs on first use)
+echo "test_key=abc123" | sonar analyze secrets --stdin
+# ✅ Expected: "Scan completed successfully"
 ```
 
 ## Quick Troubleshooting
