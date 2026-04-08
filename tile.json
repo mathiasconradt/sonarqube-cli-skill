@@ -1,0 +1,11 @@
+{
+  "name": "mathiasconradt/sonarqube-cli",
+  "version": "0.1.0",
+  "private": true,
+  "summary": "Work with SonarQube CLI - analyze code, scan for secrets, manage authentication, list issues/projects, and integrate with Claude Code. Use when the user asks about SonarQube, code quality, static analysis, code smells, vulnerability scanning, security scans, sonar issues, or integrating sonar with Claude.",
+  "skills": {
+    "sonar-cli": {
+      "path": "SKILL.md"
+    }
+  }
+}
